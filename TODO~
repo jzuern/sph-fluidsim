@@ -1,0 +1,3 @@
+- import simulation parameter from sim_setup.dat instead of hardcoded values
+- debug particle setup (box_indicator)
+- linked lists einbauen
