@@ -73,7 +73,7 @@ void compute_density_without_ll(sim_state_t* s, sim_param_t* params){
                         float z = h2 - r2;
                         if (z > 0) {
                                 float rho_ij = C*z*z*z;
-                                std::cout << "x[2*i+0] = " << x[2*i+0] << " x[2*i+1] = " << x[2*i+1] << "x[2*j+0] = " << x[2*j+0] << "x[2*j+1] = " << x[2*j+1] << std::endl;
+                                // std::cout << "x[2*i+0] = " << x[2*i+0] << " x[2*i+1] = " << x[2*i+1] << "x[2*j+0] = " << x[2*j+0] << "x[2*j+1] = " << x[2*j+1] << std::endl;
 
                                 rho[i] += rho_ij;
                                 rho[j] += rho_ij;
@@ -81,7 +81,7 @@ void compute_density_without_ll(sim_state_t* s, sim_param_t* params){
                         // std::cout << "rho[i] = " << rho[i] << ", rho[j] = " << rho[j] << std::endl;
                 }
         }
-                        for(int i=0; i<n ; i++) {  std::cout << "rho[i] = " << rho[i] << std::endl;}
+        // for(int i=0; i<n ; i++) {  std::cout << "rho[i] = " << rho[i] << std::endl;}
 
 }
 
@@ -104,7 +104,9 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
         }
 
         // for (int i = 0; i < n; i++) { rho[i] += 4*mass/M_PI/h2;}
-
+        int ndx[]={1,1,1,0,0,-1,-1,-1}; //
+        int ndy[]={-1,0,1,-1,1,-1,0,1}; //
+        int nx,ny;
 
         for(int i=0; i<nmax[0]; i++) {
                 for(int j=0; j<nmax[1]; j++) {
@@ -121,7 +123,7 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                                 float z = h2 - r2;
                                                 if (z > 0) {
                                                         float rho_ij = C*z*z*z;
-                                                        std::cout << "x[2*n1+0] = " << x[2*n1+0] << " x[2*n1+1] = " << x[2*n1+1] << "x[2*n2+0] = " << x[2*n2+0] << "x[2*n2+1] = " << x[2*n2+1] << std::endl;
+                                                        // std::cout << "x[2*n1+0] = " << x[2*n1+0] << " x[2*n1+1] = " << x[2*n1+1] << "x[2*n2+0] = " << x[2*n2+0] << "x[2*n2+1] = " << x[2*n2+1] << std::endl;
                                                         rho[n1] += rho_ij;
                                                         rho[n2] += rho_ij;
                                                 }
@@ -129,16 +131,41 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                                 n2=ll[n2];
                                         }
                                         // TODO: work on Neighbpr cells
-                                        // std::cout << "checking neighbor cells\n\n";
-                                        // for(int no=0; no<4; no++) {
-                                        // }
+                                        // Neighbpr cells
+                                        for(int no=0; no<8; no++) {
+                                                nx=i+ndx[no];
+                                                ny=j+ndy[no];
+
+                                                // Randbedigungen:
+                                                if(nx<0)           continue; // to end of loop...
+                                                if(nx>nmax[0]-1)   continue;
+                                                if(ny<0)           continue;
+                                                if(ny>nmax[1]-1)   continue;
+                                                // std::cout << "checking neighbor cell " << nx << " " << ny << std::endl;
+                                                n2=lc[nx][ny];
+
+                                                while(n2!=-1) {
+                                                        float dx = x[2*n1+0]-x[2*n2+0];
+                                                        float dy = x[2*n1+1]-x[2*n2+1];
+                                                        float r2 = dx*dx + dy*dy;
+                                                        float z = h2 - r2;
+                                                        if (z > 0) {
+                                                                float rho_ij = C*z*z*z;
+                                                                // std::cout << "x[2*n1+0] = " << x[2*n1+0] << " x[2*n1+1] = " << x[2*n1+1] << "x[2*n2+0] = " << x[2*n2+0] << "x[2*n2+1] = " << x[2*n2+1] << std::endl;
+                                                                rho[n1] += rho_ij;
+                                                                rho[n2] += rho_ij;
+                                                        }
+                                                        n2=ll[n2];
+                                                }
+                                        }
+
                                         n1=ll[n1];
                                 }
                         }
                 }
         }
 
-                for(int i=0; i<n ; i++) {  std::cout << "rho[i] = " << rho[i] << std::endl;}
+        // for(int i=0; i<n ; i++) {  std::cout << "rho[i] = " << rho[i] << std::endl;}
 
 }
 
@@ -217,7 +244,7 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                         float wv = w0 * Cv;
                                         float dvx = v[2*i+0]-v[2*j+0];
                                         float dvy = v[2*i+1]-v[2*j+1];
-                                        std::cout << "x1 = " << x[2*i+0] << ", y1 = " << x[2*i+1] <<", x2 = " << x[2*j+0] << ", y2 = " << x[2*j+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
+                                        // std::cout << "x1 = " << x[2*i+0] << ", y1 = " << x[2*i+1] <<", x2 = " << x[2*j+0] << ", y2 = " << x[2*j+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
                                         a[2*i+0] += (wp*dx + wv*dvx);
                                         a[2*i+1] += (wp*dy + wv*dvy);
                                         a[2*j+0] -= (wp*dx + wv*dvx);
@@ -235,8 +262,8 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
 
                 compute_density_with_ll(state,params,ll,lc);
 
-                int ndx[]={1,1,0,-1}; //      [3](i-1,j+1)-- [2](i,j+1) --[1](i+1,j+1)
-                int ndy[]={0,1,1,1}; //                        (i,j)   --[0](i+1,j)
+                int ndx[]={1,1,1,0,0,-1,-1,-1}; //
+                int ndy[]={-1,0,1,-1,1,-1,0,1}; //
                 int n1,n2,nx,ny;
 
                 for(int i=0; i<nmax[0]; i++) {
@@ -255,8 +282,8 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                 // std::cout << "n2 = " << n2 <<std::endl;
                                                 while(n2!=-1) {
                                                         nCalcs += 1;
-                                                        float dx = x[2*n1+0]-x[2*n2+0];
-                                                        float dy = x[2*n1+1]-x[2*n2+1];
+                                                        float dx = x[2*n2+0]-x[2*n1+0];
+                                                        float dy = x[2*n2+1]-x[2*n1+1];
                                                         float r2 = dx*dx + dy*dy;
                                                         if (r2 < h2) {
                                                                 // std::cout << n1 << " " << n2 << std::endl;
@@ -266,9 +293,9 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                                 float w0 = C0 * u/rhoi/rhoj;
                                                                 float wp = w0 * Cp * (rhoi+rhoj-2*rho0) * u/q;
                                                                 float wv = w0 * Cv;
-                                                                float dvx = v[2*n1+0]-v[2*n2+0];
-                                                                float dvy = v[2*n1+1]-v[2*n2+1];
-                                                                std::cout << "x1 = " << x[2*n1+0] << ", y1 = " << x[2*n1+1] <<", x2 = " << x[2*n2+0] << ", y2 = " << x[2*n2+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
+                                                                float dvx = v[2*n2+0]-v[2*n1+0];
+                                                                float dvy = v[2*n2+1]-v[2*n1+1];
+                                                                // std::cout << "x1 = " << x[2*n1+0] << ", y1 = " << x[2*n1+1] <<", x2 = " << x[2*n2+0] << ", y2 = " << x[2*n2+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
                                                                 a[2*n1+0] -= (wp*dx + wv*dvx);
                                                                 a[2*n1+1] -= (wp*dy + wv*dvy);
                                                                 a[2*n2+0] += (wp*dx + wv*dvx);// muss drin bleiben
@@ -277,45 +304,41 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                         n2=ll[n2];
                                                 }
                                                 // Neighbpr cells
-                                                // std::cout << "checking neighbor cells\n\n";
-                                                // for(int no=0; no<4; no++) {
-                                                //         nx=i+ndx[no];
-                                                //         ny=j+ndy[no];
-                                                //         // Randbedigungen:
-                                                //         if(nx<0)           continue; // to end of loop...
-                                                //         if(nx>nmax[0]-1)   continue;
-                                                //         if(ny<0)           continue;
-                                                //         if(ny>nmax[1]-1)   continue;
-                                                //
-                                                //         n2=lc[nx][ny];
-                                                //
-                                                //         while(n2!=-1) {
-                                                //                 nCalcs += 1;
-                                                //                 float dx = x[2*n2+0]-x[2*n1+0];
-                                                //                 float dy = x[2*n2+1]-x[2*n1+1];
-                                                //                 float r2 = dx*dx + dy*dy;
-                                                //                 if (r2 < h2) {
-                                                //                         const float rhoj = rho[n2];
-                                                //                         float q = sqrt(r2)/h;
-                                                //                         float u = 1-q;
-                                                //                         float w0 = C0 * u/rhoi/rhoj;
-                                                //                         float wp = w0 * Cp * (rhoi+rhoj-2*rho0) * u/q;
-                                                //                         float wv = w0 * Cv;
-                                                //                         float dvx = v[2*n1+0]-v[2*n2+0];
-                                                //                         float dvy = v[2*n1+1]-v[2*n2+1];
-                                                //                         // dvx /= 100000;
-                                                //                         // dvy /= 100000;
-                                                //                         // std::cout << "particle " << n1 <<  " and " << n2 <<  ". coordinates [" << x[2*n1+0] << "," << x[2*n1+1] << "] and " << x[2*n2+0] << "," << x[2*n2+1] <<". " << wp << ", " << dx << ", " << wv << ", " << dvx << std::endl;
-                                                //
-                                                //                         a[2*n2+0] += (wp*dx + wv*dvx);
-                                                //                         a[2*n2+1] += (wp*dy + wv*dvy);
-                                                //                         a[2*n1+0] -= (wp*dx + wv*dvx);
-                                                //                         a[2*n1+1] -= (wp*dy + wv*dvy);
-                                                //                 }
-                                                //                 n2=ll[n2];
-                                                //         }
-                                                // }
+                                                for(int no=0; no<8; no++) {
+                                                        nx=i+ndx[no];
+                                                        ny=j+ndy[no];
 
+                                                        // Randbedigungen:
+                                                        if(nx<0)           continue; // to end of loop...
+                                                        if(nx>nmax[0]-1)   continue;
+                                                        if(ny<0)           continue;
+                                                        if(ny>nmax[1]-1)   continue;
+                                                        // std::cout << "checking neighbor cell " << nx << " " << ny << std::endl;
+                                                        n2=lc[nx][ny];
+
+                                                        while(n2!=-1) {
+                                                                nCalcs += 1;
+                                                                float dx = x[2*n2+0]-x[2*n1+0];
+                                                                float dy = x[2*n2+1]-x[2*n1+1];
+                                                                float r2 = dx*dx + dy*dy;
+                                                                if (r2 < h2) {
+                                                                        const float rhoj = rho[n2];
+                                                                        float q = sqrt(r2)/h;
+                                                                        float u = 1-q;
+                                                                        float w0 = C0 * u/rhoi/rhoj;
+                                                                        float wp = w0 * Cp * (rhoi+rhoj-2*rho0) * u/q;
+                                                                        float wv = w0 * Cv;
+                                                                        float dvx = v[2*n2+0]-v[2*n1+0];
+                                                                        float dvy = v[2*n2+1]-v[2*n1+1];
+                                                                        // std::cout << "x1 = " << x[2*n1+0] << ", y1 = " << x[2*n1+1] <<", x2 = " << x[2*n2+0] << ", y2 = " << x[2*n2+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
+                                                                        a[2*n1+0] -= (wp*dx + wv*dvx);
+                                                                        a[2*n1+1] -= (wp*dy + wv*dvy);
+                                                                        a[2*n2+0] += (wp*dx + wv*dvx);// muss drin bleiben
+                                                                        a[2*n2+1] += (wp*dy + wv*dvy);// muss drin bleiben
+                                                                }
+                                                                n2=ll[n2];
+                                                        }
+                                                }
                                                 n1=ll[n1];
                                         }
                                 }
@@ -323,7 +346,7 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                 }
                 // std::cout << "\n\n\n\n";
         }
-        std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
+        // std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
 }
 
 
@@ -337,7 +360,7 @@ void free_state(sim_state_t* s){
 }
 
 int box_indicator(float x, float y){
-        return (x > 0.4) && (y > 0.5) && (x < 0.5) && (y < 0.6);
+        return (x > 0.4) && (y > 0.6) && (x < 0.6) && (y < 0.9);
 }
 
 int circ_indicator(float x, float y){
@@ -394,8 +417,8 @@ sim_state_t* place_particles(sim_param_t* param){
                                 s->x[2*p+1] = y;
                                 s->v[2*p+0] = 0;
                                 s->v[2*p+1] = 0;
-                                s->vh[2*p+0] = 0;
-                                s->vh[2*p+1] = 0;
+                                // s->vh[2*p+0] = 0;
+                                // s->vh[2*p+1] = 0;
                                 ++p;
                         }
                 }
