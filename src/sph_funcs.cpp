@@ -104,8 +104,10 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
         }
 
         // for (int i = 0; i < n; i++) { rho[i] += 4*mass/M_PI/h2;}
-        int ndx[]={1,1,1,0,0,-1,-1,-1}; //
-        int ndy[]={-1,0,1,-1,1,-1,0,1}; //
+        // int ndx[]={1,1,1,0,0,-1,-1,-1}; //
+        // int ndy[]={-1,0,1,-1,1,-1,0,1}; //
+        int ndx[]={1,1,0,-1};
+        int ndy[]={0,1,1,1};
         int nx,ny;
 
         for(int i=0; i<nmax[0]; i++) {
@@ -115,14 +117,15 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                 while(n1 != -1) {
                                         n2=ll[n1];
                                         rho[n1] += 4*mass/M_PI/h2;
-                                        // std::cout << "4*mass/M_PI/h2 = " << 4*mass/M_PI/h2 << std::endl;
                                         while(n2!=-1) {
                                                 float dx = x[2*n1+0]-x[2*n2+0];
                                                 float dy = x[2*n1+1]-x[2*n2+1];
                                                 float r2 = dx*dx + dy*dy;
                                                 float z = h2 - r2;
                                                 if (z > 0) {
+
                                                         float rho_ij = C*z*z*z;
+
                                                         // std::cout << "x[2*n1+0] = " << x[2*n1+0] << " x[2*n1+1] = " << x[2*n1+1] << "x[2*n2+0] = " << x[2*n2+0] << "x[2*n2+1] = " << x[2*n2+1] << std::endl;
                                                         rho[n1] += rho_ij;
                                                         rho[n2] += rho_ij;
@@ -130,9 +133,8 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                                 // std::cout << "rho[i] = " << rho[n1] << ", rho[j] = " << rho[n2] << std::endl;
                                                 n2=ll[n2];
                                         }
-                                        // TODO: work on Neighbpr cells
                                         // Neighbpr cells
-                                        for(int no=0; no<8; no++) {
+                                        for(int no=0; no<4; no++) {
                                                 nx=i+ndx[no];
                                                 ny=j+ndy[no];
 
@@ -141,7 +143,7 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                                 if(nx>nmax[0]-1)   continue;
                                                 if(ny<0)           continue;
                                                 if(ny>nmax[1]-1)   continue;
-                                                // std::cout << "checking neighbor cell " << nx << " " << ny << std::endl;
+                                                // std::cout << "    checking neighbor cell " << nx << " " << ny << std::endl;
                                                 n2=lc[nx][ny];
 
                                                 while(n2!=-1) {
@@ -152,11 +154,13 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                                         if (z > 0) {
                                                                 float rho_ij = C*z*z*z;
                                                                 // std::cout << "x[2*n1+0] = " << x[2*n1+0] << " x[2*n1+1] = " << x[2*n1+1] << "x[2*n2+0] = " << x[2*n2+0] << "x[2*n2+1] = " << x[2*n2+1] << std::endl;
+                                                                // std::cout << "rho_ij = " << rho_ij << std::endl;
                                                                 rho[n1] += rho_ij;
                                                                 rho[n2] += rho_ij;
                                                         }
                                                         n2=ll[n2];
                                                 }
+                                                // std::cout << "    end checking neighbor cell " << nx << " " << ny << std::endl;
                                         }
 
                                         n1=ll[n1];
@@ -262,8 +266,10 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
 
                 compute_density_with_ll(state,params,ll,lc);
 
-                int ndx[]={1,1,1,0,0,-1,-1,-1}; //
-                int ndy[]={-1,0,1,-1,1,-1,0,1}; //
+                // int ndx[]={1,1,1,0,0,-1,-1,-1}; //
+                // int ndy[]={-1,0,1,-1,1,-1,0,1}; //
+                int ndx[]={1,1,0,-1};
+                int ndy[]={0,1,1,1};
                 int n1,n2,nx,ny;
 
                 for(int i=0; i<nmax[0]; i++) {
@@ -303,8 +309,8 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                         }
                                                         n2=ll[n2];
                                                 }
-                                                // Neighbpr cells
-                                                for(int no=0; no<8; no++) {
+                                                // Neighbor cells
+                                                for(int no=0; no<4; no++) {
                                                         nx=i+ndx[no];
                                                         ny=j+ndy[no];
 
@@ -346,7 +352,7 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                 }
                 // std::cout << "\n\n\n\n";
         }
-        // std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
+        std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
 }
 
 
@@ -360,7 +366,7 @@ void free_state(sim_state_t* s){
 }
 
 int box_indicator(float x, float y){
-        return (x > 0.4) && (y > 0.6) && (x < 0.6) && (y < 0.9);
+        return (x > 0.3) && (y > 0.3) && (x < 0.7) && (y < 0.7);
 }
 
 int circ_indicator(float x, float y){

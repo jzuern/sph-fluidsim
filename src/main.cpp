@@ -69,7 +69,7 @@ int main( int argc, const char* argv[]){
         leapfrog_start(state,dt);
         check_state(state);
 
-        // print_neighour_list(state,params,ll,lc);
+        print_neighour_list(state,params,ll,lc);
 
         for (int frame = 1; frame < nFrames; ++frame) { // main simulation loop
                 cout << "Calculating Frame " << frame << " of " << nFrames << "\n";
@@ -77,7 +77,7 @@ int main( int argc, const char* argv[]){
                         compute_accel(state, &params,ll,lc); // update values for accellerations
                         leapfrog_step(state, dt); // update velocities and positions based on previously calculated accelleration
                         check_state(state);
-                        usleep(50000);
+                        usleep(100);
                 }
                 write_frame_data(frame,out, n, state->x);
                 plot_points(frame);
@@ -88,7 +88,7 @@ int main( int argc, const char* argv[]){
         // Plotting simulation results
         // for (int frame = 1; frame < nFrames; ++frame) {
         //  plot_points(frame);
-        //  usleep(15000);
+        //  usleep(25000);
         // }
         char c;
         cin >> c;

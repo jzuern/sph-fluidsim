@@ -1,3 +1,19 @@
-- debug particle setup (box_indicator)
-- debug linked lists
-- openmp parallel working?
+DESCRIPTION
+
+
+INSTALLATION
+
+
+
+USAGE
+
+
+
+///////////////////////////////////////
+
+
+TODO
+
+Debug Neighbor List with mutiple cells
+Dont write data to disk, just plot it
+Improve visualization (color coding of rho?)

@@ -1,6 +1,19 @@
+DESCRIPTION
+
+
+INSTALLATION
+
+
+
+USAGE
+
+
+
+///////////////////////////////////////
+
+
 TODO
 
-
-- debug particle setup (box_indicator)
-- debug linked lists
-- openmp parallel working?
+Twin particle issue?
+Dont write data to disk, just plot it
+Improve visualization (color coding of rho?)
