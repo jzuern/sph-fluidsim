@@ -1,7 +1,6 @@
 #include "linked_list.h"
 
 
-
 int* init_ll(sim_param_t param, sim_state_t* state){
         // std::cout << "in init_ll \n";
         int ntot = state->n; // number of particles in simulation
@@ -79,7 +78,6 @@ void print_neighour_list(sim_state_t* state,sim_param_t param,int *ll, int **lc)
         for(int i=0; i<2; i++) { // go through each dimension
                 nmax[i]=int(floor(1/rcut));
         }
-
 
         for(int i=0; i<nmax[0]; i++) {
                 for(int j=0; j<nmax[1]; j++) {

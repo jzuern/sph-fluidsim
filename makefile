@@ -1,7 +1,6 @@
 CC=g++
-INC=-I/home/jzuern/Dropbox/develop/C++/Libraries/gnuplot/
-CFLAGS=-c  -Wall -std=c++11 $(INC)
-LDFLAGS=-fopenmp
+CFLAGS=-c  -Wall -Wextra -g -D_GLIBCXX_DEBUG -std=c++11
+LDFLAGS=-fopenmp -lutil -lboost_iostreams -lboost_system -lboost_filesystem
 LDLIBS=
 SOURCEPATH=src
 SOURCES=$(SOURCEPATH)/main.cpp \
@@ -15,10 +14,10 @@ EXECUTABLE=fluidsim
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	    $(CC) $(LDFLAGS) $(OBJECTS) $(LDLIBS)-o $@
+	    $(CC) -o $@ $^ $(LDFLAGS) 
 
 .cpp.o:
-	    $(CC) $(CFLAGS) $< -o $@
+	    $(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 				rm $(SOURCEPATH)/*.o

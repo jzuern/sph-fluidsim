@@ -1,9 +1,15 @@
 #include "sph_funcs.h"
 #include "linked_list.h"
 
-#include "gnuplot.h" // must be included here..
-Gnuplot gpl;
+// #include "gnuplot.h" // must be included here..
+// Gnuplot gpl;
 
+#include <boost/tuple/tuple.hpp>
+
+// This must be defined before the first time that "gnuplot-iostream.h" is included.
+#define GNUPLOT_ENABLE_PTY
+#include "gnuplot-iostream.h"
+        Gnuplot gp;
 
 sim_param_t initialize_sim_param_t(std::vector<std::string> paramvector){
         sim_param_t params;
@@ -21,31 +27,19 @@ sim_param_t initialize_sim_param_t(std::vector<std::string> paramvector){
 
 
 
-void plot_points(int frame){
+void plotPoints(int frame,std::ofstream& out, int n, sim_state_t* s,sim_param_t params){
 
-        std::stringstream sstm;
-        std::string filename = "sim_data/frame_";
-        sstm << filename << frame;
-        filename = sstm.str() +  ".dat";
-        gpl.reset_plot();
-        gpl.remove_tmpfiles();
-        gpl.set_xrange(0,1).set_yrange(0,1);
-        std::string command = "plot \'" + filename + "' with points pointtype 5\n";
-        gpl << command;
-}
-
-void write_frame_data(int frame,std::ofstream& out, int n, float* x){
-
-        std::stringstream sstm;
-        std::string filename = "sim_data/frame_";
-        sstm << filename << frame;
-        filename = sstm.str() +  ".dat";
-        out.open(filename.c_str());
-
+        float* x = s->x;
+        std::vector<boost::tuple<float,float> > points;
         for(int i = 0; i < n; i++) {
-                out << x[2*i] << " " << x[2*i+1] << "\n"; // write out x and y coordinates of each particle
+                points.push_back(boost::make_tuple(x[2*i+0], x[2*i+1]));
         }
-        out.close();
+
+        gp << "set xrange [0:1]\n";
+        gp << "set yrange [0:1]\n";
+        gp << "plot '-' with points pointtype 7\n";
+        gp.send1d(points);
+
 }
 
 
@@ -59,8 +53,6 @@ void compute_density_without_ll(sim_state_t* s, sim_param_t* params){
         float h8 = (h2*h2)*(h2*h2);
         float C = 4*s->mass / M_PI / h8;
         memset(rho, 0, n*sizeof(float)); // sets values of rho to (double)0
-
-
 
         for (int i = 0; i < n; i++) {
                 //std::cout << "i = " << i << "\n";
@@ -352,7 +344,7 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                 }
                 // std::cout << "\n\n\n\n";
         }
-        std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
+        // std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
 }
 
 
@@ -371,9 +363,9 @@ int box_indicator(float x, float y){
 
 int circ_indicator(float x, float y){
         float dx = (x-0.5);
-        float dy = (y-0.5);
+        float dy = (y-0.6);
         float r2 = dx*dx + dy*dy;
-        return (r2 < 0.25*0.25);
+        return (r2 > 0.3*0.3 && r2 < 0.4*0.4);
 }
 
 
@@ -400,12 +392,14 @@ sim_state_t* init_particles(sim_param_t* param){
 
 sim_state_t* place_particles(sim_param_t* param){
         float h = param->h;
-        float hh = h/1.3; // 1.3 why 1.3 ?????ß
+        float hh = h/1.0;// Initialize points closer than radius to each other so that
+                         //realistic behaviour is obtained
+
         // Count mesh points that fall in indicated region.
         int count = 0;
         for (float x = 0; x < 1; x += hh) {
                 for (float y = 0; y < 1; y += hh) {
-                        count += box_indicator(x,y);
+                        count += circ_indicator(x,y);
                 }
         }
 
@@ -415,16 +409,16 @@ sim_state_t* place_particles(sim_param_t* param){
         // debug segmentation fault
         std::cout << " Number of particles in Simulation: " << s->n << std::endl;
 
+        float rd;
         int p = 0;
         for (float x = 0; x < 1; x += hh) {
                 for (float y = 0; y < 1; y += hh) {
-                        if (box_indicator(x,y)) {
+                        if (circ_indicator(x,y)) {
+                                rd = float(std::rand())/100000000000;
                                 s->x[2*p+0] = x;
                                 s->x[2*p+1] = y;
-                                s->v[2*p+0] = 0;
-                                s->v[2*p+1] = 0;
-                                // s->vh[2*p+0] = 0;
-                                // s->vh[2*p+1] = 0;
+                                s->v[2*p+0] = rd;
+                                s->v[2*p+1] = rd;
                                 ++p;
                         }
                 }

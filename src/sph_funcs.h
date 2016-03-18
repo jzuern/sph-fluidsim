@@ -10,9 +10,10 @@
 #include <string.h>
 #include <fstream>
 #include <sstream>
+#include <stdlib.h>
 
 #include <omp.h>
-
+#include "gnuplot-iostream.h"
 
 struct sim_param_t{
   const char* filename; // File name
@@ -41,12 +42,10 @@ sim_param_t initialize_sim_param_t(std::vector<std::string> paramvector);
 
 void reflect_bc(sim_state_t* s);
 
-void plot_points(int frame);
-
 int box_indicator(float x, float y);
 int circ_indicator(float x, float y);
 
-void write_frame_data(int frame,std::ofstream& out,int n, float* x);
+void plotPoints(int frame,std::ofstream& out,int n, sim_state_t* s,sim_param_t params);
 
 sim_state_t* alloc_state(int n); // alloc memory for sim_state_t
 void free_state(sim_state_t* s); // free memory of sim_state:t
@@ -61,8 +60,6 @@ sim_state_t* place_particles(sim_param_t* param);
 void normalize_mass(sim_state_t* s, sim_param_t* param);
 void check_state(sim_state_t* s);
 static void damp_reflect(int which, float barrier, float* x, float* v, float* vh);
-
-
 
 
 #endif // SPH_FUNCS_H

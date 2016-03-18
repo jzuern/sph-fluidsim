@@ -16,6 +16,13 @@ using namespace std;
 #include "integrate.h"
 #include "linked_list.h"
 
+#include <boost/tuple/tuple.hpp>
+
+// This must be defined before the first time that "gnuplot-iostream.h" is included.
+#define GNUPLOT_ENABLE_PTY
+#include "gnuplot-iostream.h"
+
+
 
 int main( int argc, const char* argv[]){
 
@@ -59,9 +66,6 @@ int main( int argc, const char* argv[]){
         float dt = params.dt;
         int n = state->n;
 
-        // print_neighour_list(state,params,ll,lc);
-
-
         ofstream out;
         out.open(params.filename,ios::ate); //write new data always at the end (ate)
 
@@ -71,16 +75,16 @@ int main( int argc, const char* argv[]){
 
         print_neighour_list(state,params,ll,lc);
 
+
         for (int frame = 1; frame < nFrames; ++frame) { // main simulation loop
                 cout << "Calculating Frame " << frame << " of " << nFrames << "\n";
                 for (int i = 0; i < nStepsFrame; ++i) { // frame loop
                         compute_accel(state, &params,ll,lc); // update values for accellerations
                         leapfrog_step(state, dt); // update velocities and positions based on previously calculated accelleration
                         check_state(state);
-                        usleep(100);
                 }
-                write_frame_data(frame,out, n, state->x);
-                plot_points(frame);
+                plotPoints(frame,out, n, state,params);
+                usleep(10000);
         }
 
         free_state(state);
@@ -90,6 +94,42 @@ int main( int argc, const char* argv[]){
         //  plot_points(frame);
         //  usleep(25000);
         // }
+
+
+        // TEST INTERACTIVE VISUALIZATION
+
+        // Gnuplot gp;
+        //
+        // // Create field of arrows at random locations.
+        // std::vector<boost::tuple<double,double,double,double> > arrows;
+        // for(size_t i=0; i<100; i++) {
+        //         double x = rand() / double(RAND_MAX);
+        //         double y = rand() / double(RAND_MAX);
+        //         arrows.push_back(boost::make_tuple(x, y, 0, 0));
+        // }
+        //
+        // double mx=0.5, my=0.5;
+        // int mb=1;
+        // while(mb != 3 && mb >= 0) {
+        //         // Make the arrows point towards the mouse click.
+        //         for(size_t i=0; i<arrows.size(); i++) {
+        //                 double x = arrows[i].get<0>();
+        //                 double y = arrows[i].get<1>();
+        //                 double dx = (mx-x) * 0.1;
+        //                 double dy = (my-y) * 0.1;
+        //                 arrows[i] = boost::make_tuple(x, y, dx, dy);
+        //         }
+        //
+        //         gp << "plot '-' with vectors notitle\n";
+        //         gp.send1d(arrows);
+        //
+        //         gp.getMouse(mx, my, mb, "Left click to aim arrows, right click to exit.");
+        //         printf("You pressed mouse button %d at x=%f y=%f\n", mb, mx, my);
+        //         if(mb < 0) printf("The gnuplot window was closed.\n");
+        // }
+
+
+
         char c;
         cin >> c;
 

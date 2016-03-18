@@ -1,8 +1,12 @@
 DESCRIPTION
 
+Smoothed-Particle-Hydrodynamics (SPH) Fluid Simulation. Interactive approach
 
 INSTALLATION
 
+Libraries:
+omp.h
+boost
 
 
 USAGE
@@ -14,6 +18,5 @@ USAGE
 
 TODO
 
-Debug Neighbor List with mutiple cells
-Dont write data to disk, just plot it
-Improve visualization (color coding of rho?)
+implement interactivity with mouse
+
