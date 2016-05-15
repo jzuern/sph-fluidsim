@@ -73,7 +73,9 @@ int main( int argc, const char* argv[]){
         leapfrog_start(state,dt);
         check_state(state);
 
-        print_neighour_list(state,params,ll,lc);
+        // print_neighour_list(state,params,ll,lc);
+
+        bool initialize = true;
 
 
         for (int frame = 1; frame < nFrames; ++frame) { // main simulation loop
@@ -84,7 +86,7 @@ int main( int argc, const char* argv[]){
                         check_state(state);
                 }
                 plotPoints(frame,out, n, state,params);
-                usleep(10000);
+                usleep(1000);
         }
 
         free_state(state);
@@ -94,7 +96,6 @@ int main( int argc, const char* argv[]){
         //  plot_points(frame);
         //  usleep(25000);
         // }
-
 
         // TEST INTERACTIVE VISUALIZATION
 

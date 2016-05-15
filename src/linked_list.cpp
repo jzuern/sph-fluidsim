@@ -2,9 +2,8 @@
 
 
 int* init_ll(sim_param_t param, sim_state_t* state){
-        // std::cout << "in init_ll \n";
         int ntot = state->n; // number of particles in simulation
-        int* ll = new int[ntot]; // f�r jedes Atom wird ein Eintrag ben�tigt
+        int* ll = new int[ntot];
         for(int i=0; i<ntot; i++) { // initialize with value -1 (empty)
                 ll[i]=-1;
         }
@@ -22,9 +21,9 @@ int** init_lc(sim_param_t param, sim_state_t* state){
         }
 
         int** lc = new int*[nmax[0]];
-        lc[0]= new int[(nmax[0])*(nmax[1])]; // siehe 2d Feld Initialisierung
+        lc[0]= new int[(nmax[0])*(nmax[1])];
 
-        for(int i=1; i<nmax[0]; i++) {// Pointer Arithmetik
+        for(int i=1; i<nmax[0]; i++) {
                 lc[i]=lc[0]+i*(nmax[1]);
         }
 
@@ -57,12 +56,8 @@ void setup_neighbour_list(sim_param_t* param, sim_state_t* state, int *ll, int *
                 nidx[1]=std::min(nidx[1],nmax[1]-1); // check for domain
                 nidx[1]=std::max(nidx[1],0);
 
-                // std::cout << "coordinates " << state->x[2*i] << ", " <<  state->x[2*i+1];
-                // std::cout << "Particle " << i << " goes into cell " << nidx[0] << ", " <<  nidx[1] << std::endl;
-
                 ll[i] = lc[nidx[0]][nidx[1]];
                 lc[nidx[0]][nidx[1]]=i;
-                // std::cout << "ll[i] =  " << ll[i] << ", lc[nidx[0]][nidx[1]] = " << lc[nidx[0]][nidx[1]] <<  std::endl;
         }
 }
 

@@ -9,7 +9,7 @@
 // This must be defined before the first time that "gnuplot-iostream.h" is included.
 #define GNUPLOT_ENABLE_PTY
 #include "gnuplot-iostream.h"
-        Gnuplot gp;
+Gnuplot gp;
 
 sim_param_t initialize_sim_param_t(std::vector<std::string> paramvector){
         sim_param_t params;
@@ -29,11 +29,44 @@ sim_param_t initialize_sim_param_t(std::vector<std::string> paramvector){
 
 void plotPoints(int frame,std::ofstream& out, int n, sim_state_t* s,sim_param_t params){
 
+        // if (initialize == true) {
+        //
+        //         double mx=0.5, my=0.5;
+        //         int mb=1;
+        //         while(mb != 3 && mb >= 0) {
+        //                 // Make the arrows point towards the mouse click.
+        //                 for(size_t i=0; i<arrows.size(); i++) {
+        //                         double x = arrows[i].get<0>();
+        //                         double y = arrows[i].get<1>();
+        //                         double dx = (mx-x) * 0.1;
+        //                         double dy = (my-y) * 0.1;
+        //                         arrows[i] = boost::make_tuple(x, y, dx, dy);
+        //                 }
+        //
+        //                 gp << "plot '-' with vectors notitle\n";
+        //                 gp.send1d(arrows);
+        //                 gp.getMouse(mx, my, mb, "Left click to place droplets, right click to exit.");
+        //                 printf("You pressed mouse button %d at x=%f y=%f\n", mb, mx, my);
+        //                 if(mb < 0) {
+        //                   initialize = false;
+        //                   printf("The gnuplot window was closed.\n");
+        //               }
+        //         }
+        //
+        // }
+
+
         float* x = s->x;
         std::vector<boost::tuple<float,float> > points;
         for(int i = 0; i < n; i++) {
                 points.push_back(boost::make_tuple(x[2*i+0], x[2*i+1]));
         }
+
+        //
+        //
+        // gp << "pause mouse\n";
+        // gp << "if (defined(MOUSE_BUTTON)) print 'mouse click';  else print \"No mouse click.\"\n";
+
 
         gp << "set xrange [0:1]\n";
         gp << "set yrange [0:1]\n";
@@ -145,29 +178,21 @@ void compute_density_with_ll(sim_state_t* s, sim_param_t* params, int* ll, int *
                                                         float z = h2 - r2;
                                                         if (z > 0) {
                                                                 float rho_ij = C*z*z*z;
-                                                                // std::cout << "x[2*n1+0] = " << x[2*n1+0] << " x[2*n1+1] = " << x[2*n1+1] << "x[2*n2+0] = " << x[2*n2+0] << "x[2*n2+1] = " << x[2*n2+1] << std::endl;
-                                                                // std::cout << "rho_ij = " << rho_ij << std::endl;
                                                                 rho[n1] += rho_ij;
                                                                 rho[n2] += rho_ij;
                                                         }
                                                         n2=ll[n2];
                                                 }
-                                                // std::cout << "    end checking neighbor cell " << nx << " " << ny << std::endl;
                                         }
-
                                         n1=ll[n1];
                                 }
                         }
                 }
         }
-
-        // for(int i=0; i<n ; i++) {  std::cout << "rho[i] = " << rho[i] << std::endl;}
-
 }
 
 
 void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
-
 
         // Unpack basic parameters
         const float h= params->h;
@@ -240,12 +265,10 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                         float wv = w0 * Cv;
                                         float dvx = v[2*i+0]-v[2*j+0];
                                         float dvy = v[2*i+1]-v[2*j+1];
-                                        // std::cout << "x1 = " << x[2*i+0] << ", y1 = " << x[2*i+1] <<", x2 = " << x[2*j+0] << ", y2 = " << x[2*j+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
                                         a[2*i+0] += (wp*dx + wv*dvx);
                                         a[2*i+1] += (wp*dy + wv*dvy);
                                         a[2*j+0] -= (wp*dx + wv*dvx);
                                         a[2*j+1] -= (wp*dy + wv*dvy);
-                                        // std::cout  << a[2*j+0] << ", " << a[2*j+1] << std::endl;
                                 }
                         }
                 }
@@ -258,8 +281,6 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
 
                 compute_density_with_ll(state,params,ll,lc);
 
-                // int ndx[]={1,1,1,0,0,-1,-1,-1}; //
-                // int ndy[]={-1,0,1,-1,1,-1,0,1}; //
                 int ndx[]={1,1,0,-1};
                 int ndy[]={0,1,1,1};
                 int n1,n2,nx,ny;
@@ -269,22 +290,16 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                         for(int j=0; j<nmax[1]; j++) {
                                 // std::cout << "j = " << j << "\n";
                                 if(lc[i][j]!=-1) {
-                                        // std::cout << "lc[i][j] =  " << lc[i][j]<< "\n";
                                         n1=lc[i][j];
-                                        // std::cout << "n1 = " << n1 <<std::endl;
-                                        // std::cout<<"checking cell i,j:"<<i<<","<<j<<std::endl;
                                         while(n1 != -1) {
                                                 n2=ll[n1];
                                                 const float rhoi = rho[n1];
-                                                // std::cout<<"rhoi = "<<rhoi<<std::endl;
-                                                // std::cout << "n2 = " << n2 <<std::endl;
                                                 while(n2!=-1) {
                                                         nCalcs += 1;
                                                         float dx = x[2*n2+0]-x[2*n1+0];
                                                         float dy = x[2*n2+1]-x[2*n1+1];
                                                         float r2 = dx*dx + dy*dy;
                                                         if (r2 < h2) {
-                                                                // std::cout << n1 << " " << n2 << std::endl;
                                                                 const float rhoj = rho[n2];
                                                                 float q = sqrt(r2)/h;
                                                                 float u = 1-q;
@@ -293,7 +308,6 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                                 float wv = w0 * Cv;
                                                                 float dvx = v[2*n2+0]-v[2*n1+0];
                                                                 float dvy = v[2*n2+1]-v[2*n1+1];
-                                                                // std::cout << "x1 = " << x[2*n1+0] << ", y1 = " << x[2*n1+1] <<", x2 = " << x[2*n2+0] << ", y2 = " << x[2*n2+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
                                                                 a[2*n1+0] -= (wp*dx + wv*dvx);
                                                                 a[2*n1+1] -= (wp*dy + wv*dvy);
                                                                 a[2*n2+0] += (wp*dx + wv*dvx);// muss drin bleiben
@@ -306,12 +320,11 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                         nx=i+ndx[no];
                                                         ny=j+ndy[no];
 
-                                                        // Randbedigungen:
+                                                        // boundaries:
                                                         if(nx<0)           continue; // to end of loop...
                                                         if(nx>nmax[0]-1)   continue;
                                                         if(ny<0)           continue;
                                                         if(ny>nmax[1]-1)   continue;
-                                                        // std::cout << "checking neighbor cell " << nx << " " << ny << std::endl;
                                                         n2=lc[nx][ny];
 
                                                         while(n2!=-1) {
@@ -328,11 +341,10 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                                                         float wv = w0 * Cv;
                                                                         float dvx = v[2*n2+0]-v[2*n1+0];
                                                                         float dvy = v[2*n2+1]-v[2*n1+1];
-                                                                        // std::cout << "x1 = " << x[2*n1+0] << ", y1 = " << x[2*n1+1] <<", x2 = " << x[2*n2+0] << ", y2 = " << x[2*n2+1] << "wp = " << wp << ", wv = " << wv << ", dvy = " << dvy << ", dx = " << dx << ", dy = " << dy << ", dvx = " << dvx << std::endl;
                                                                         a[2*n1+0] -= (wp*dx + wv*dvx);
                                                                         a[2*n1+1] -= (wp*dy + wv*dvy);
-                                                                        a[2*n2+0] += (wp*dx + wv*dvx);// muss drin bleiben
-                                                                        a[2*n2+1] += (wp*dy + wv*dvy);// muss drin bleiben
+                                                                        a[2*n2+0] += (wp*dx + wv*dvx);
+                                                                        a[2*n2+1] += (wp*dy + wv*dvy);
                                                                 }
                                                                 n2=ll[n2];
                                                         }
@@ -342,9 +354,7 @@ void compute_accel(sim_state_t* state, sim_param_t* params, int* ll, int **lc){
                                 }
                         }
                 }
-                // std::cout << "\n\n\n\n";
         }
-        // std::cout << "Total number of neighbor-checkings: " << nCalcs << std::endl;
 }
 
 
@@ -365,7 +375,7 @@ int circ_indicator(float x, float y){
         float dx = (x-0.5);
         float dy = (y-0.6);
         float r2 = dx*dx + dy*dy;
-        return (r2 > 0.3*0.3 && r2 < 0.4*0.4);
+        return (r2 > 0.1*0.1 && r2 < 0.3*0.3);
 }
 
 
